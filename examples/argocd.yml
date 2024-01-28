@@ -1,0 +1,30 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: ndots-admission-webhook
+  namespace: argocd
+  labels:
+    layer: 'base'
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  destination:
+    name: in-cluster
+    namespace: default
+  sources:
+    - path: charts/ndots-injector-mutating-webhook
+      targetRevision: main
+      repoURL: https://github.com/rdvencioneck/ndots-mutating-webhook.git
+      helm:
+        values: |
+          targetNamespaces:
+            - app
+          ndots: 1
+          image:
+            pullPolicy: Always
+  project: default
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
