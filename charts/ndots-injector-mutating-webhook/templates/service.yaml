@@ -1,0 +1,10 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: ndots-injector-mutating-webhook
+spec:
+  selector:
+    webhook: ndots-injector
+  ports:
+    - port: 443
+      targetPort: 443

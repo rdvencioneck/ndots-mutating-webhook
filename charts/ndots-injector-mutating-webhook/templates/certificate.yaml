@@ -1,0 +1,71 @@
+---
+kind: ClusterIssuer
+apiVersion: cert-manager.io/v1
+metadata:
+  name: ndots-injector-ca-issuer
+spec:
+  selfSigned: {}
+---
+kind: Certificate
+apiVersion: cert-manager.io/v1
+metadata:
+  name: ndots-injector-ca-cert
+  namespace: {{ .Values.certManagerNamespace }}
+spec:
+  secretName: ndots-injector-ca-cert
+  isCA: true
+  commonName: ndots-injector-ca-cert
+  privateKey:
+    algorithm: RSA
+    size: 2048
+  issuerRef:
+    kind: ClusterIssuer
+    name: ndots-injector-ca-issuer
+---
+kind: ClusterIssuer
+apiVersion: cert-manager.io/v1
+metadata:
+  name: ndots-injector-ca-cert
+spec:
+  ca:
+    secretName: ndots-injector-ca-cert
+---
+kind: Certificate
+apiVersion: cert-manager.io/v1
+metadata:
+  name: ndots-injector-server
+spec:
+  issuerRef:
+    name: ndots-injector-ca-cert
+    kind: ClusterIssuer
+  secretName: ndots-injector-server
+  duration: 2160h0m0s
+  renewBefore: 360h0m0s
+  dnsNames:
+    - ndots-injector-mutating-webhook.{{ .Release.Namespace }}.svc
+  privateKey:
+    algorithm: RSA
+    size: 2048
+  usages:
+    - client auth
+    - server auth
+---
+kind: Certificate
+apiVersion: cert-manager.io/v1
+metadata:
+  name: ndots-injector-clients
+spec:
+  issuerRef:
+    name: ndots-injector-ca-cert
+    kind: ClusterIssuer
+  secretName: ndots-injector-clients
+  duration: 2160h0m0s
+  renewBefore: 360h0m0s
+  dnsNames:
+    - ndots-injector-webhook.rdvencioneck.com
+  privateKey:
+    algorithm: RSA
+    size: 2048
+  usages:
+    - client auth
+    - server auth

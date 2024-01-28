@@ -1,0 +1,31 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: ndots-injector-mutating-webhook
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      webhook: ndots-injector
+  template:
+    metadata:
+      labels:
+        webhook: ndots-injector
+    spec:
+      containers:
+        - name: ndots-injector-mutating-webhook
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: NDOTS
+              value: "{{ .Values.ndots }}"
+          ports:
+            - containerPort: 443
+          volumeMounts:
+            - name: certificate
+              mountPath: /etc/certs
+              readOnly: true
+      volumes:
+        - name: certificate
+          secret:
+            secretName: ndots-injector-server

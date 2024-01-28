@@ -1,0 +1,8 @@
+targetNamespaces: []
+replicaCount: 1
+certManagerNamespace: cert-manager
+ndots: 1
+image:
+  repository: rdvencioneck/ndots-injector-mutating-webhook
+  tag: v0.1.1
+  pullPolicy: IfnotPresent

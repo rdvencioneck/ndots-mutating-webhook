@@ -1,0 +1,33 @@
+kind: MutatingWebhookConfiguration
+apiVersion: admissionregistration.k8s.io/v1
+metadata:
+  name: ndots-injector
+  annotations:
+    cert-manager.io/inject-ca-from: {{ .Release.Namespace }}/ndots-injector-clients
+webhooks:
+  - name: ndots-injector.mutating.webhook
+    namespaceSelector:
+      matchExpressions:
+      - key: kubernetes.io/metadata.name
+        operator: NotIn
+        values:
+          - {{ .Release.Namespace }}
+      {{- if gt (len .Values.targetNamespaces) 0 }}
+      - key: kubernetes.io/metadata.name
+        operator: In
+        values:
+          {{- toYaml .Values.targetNamespaces | nindent 10 }}
+      {{- end }}
+    clientConfig:
+      service:
+        namespace: {{ .Release.Namespace }}
+        name: ndots-injector-mutating-webhook
+        path: /mutate
+    rules:
+      - apiGroups: [""]
+        apiVersions: ["v1"]
+        resources: ["pods"]
+        operations: ["CREATE"]
+        scope: Namespaced
+    sideEffects: None
+    admissionReviewVersions: ["v1"]
